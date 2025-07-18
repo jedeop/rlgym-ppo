@@ -24,9 +24,9 @@ class PPOLearner(object):
         ent_coef,
         mini_batch_size,
         device,
+        optimizer,
         actor=None,
         critic=None,
-        optimizer=torch.optim.Adam,
     ):
         self.device = device
 

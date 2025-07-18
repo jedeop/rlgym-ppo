@@ -79,7 +79,7 @@ class Learner(object):
             
             actor_net: Union[torch.nn.Module, None] = None,
             critic_net: Union[torch.nn.Module, None] = None,
-            optimizer: Union[torch.optim.Optimizer, None] = None,
+            optimizer: type[torch.optim.Optimizer] = torch.optim.Adam,
             ):
 
         assert (
@@ -111,6 +111,9 @@ class Learner(object):
 
         if device in {"auto", "gpu"} and torch.cuda.is_available():
             self.device = "cuda:0"
+            torch.backends.cudnn.benchmark = True
+        if device in {"auto"} and torch.backends.mps.is_available():
+            self.device = "mps"
             torch.backends.cudnn.benchmark = True
         elif device == "auto" and not torch.cuda.is_available():
             self.device = "cpu"
