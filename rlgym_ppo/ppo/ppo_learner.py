@@ -24,6 +24,9 @@ class PPOLearner(object):
         ent_coef,
         mini_batch_size,
         device,
+        actor=None,
+        critic=None,
+        optimizer=torch.optim.Adam,
     ):
         self.device = device
 
@@ -31,7 +34,9 @@ class PPOLearner(object):
             batch_size % mini_batch_size == 0
         ), "MINIBATCH SIZE MUST BE AN INTEGER MULTIPLE OF BATCH SIZE"
 
-        if policy_type == 2:
+        if actor != None:
+            self.policy = actor.to(device)
+        elif policy_type == 2:
             self.policy = ContinuousPolicy(
                 obs_space_size,
                 act_space_size * 2,
@@ -48,13 +53,17 @@ class PPOLearner(object):
             self.policy = DiscreteFF(
                 obs_space_size, act_space_size, policy_layer_sizes, device
             ).to(device)
-        self.value_net = ValueEstimator(obs_space_size, critic_layer_sizes, device).to(
-            device
-        )
+
+        if critic is not None:
+            self.value_net = critic.to(device)
+        else:
+            self.value_net = ValueEstimator(obs_space_size, critic_layer_sizes, device).to(
+                device
+            )
         self.mini_batch_size = mini_batch_size
 
-        self.policy_optimizer = torch.optim.Adam(self.policy.parameters(), lr=policy_lr)
-        self.value_optimizer = torch.optim.Adam(
+        self.policy_optimizer = optimizer(self.policy.parameters(), lr=policy_lr)
+        self.value_optimizer = optimizer(
             self.value_net.parameters(), lr=critic_lr
         )
         self.value_loss_fn = torch.nn.MSELoss()

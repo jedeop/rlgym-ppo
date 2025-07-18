@@ -75,7 +75,12 @@ class Learner(object):
             random_seed: int = 123,
             n_checkpoints_to_keep: int = 5,
             shm_buffer_size: int = 8192,
-            device: str = "auto"):
+            device: str = "auto",
+            
+            actor_net: Union[torch.nn.Module, None] = None,
+            critic_net: Union[torch.nn.Module, None] = None,
+            optimizer: Union[torch.optim.Optimizer, None] = None,
+            ):
 
         assert (
                 env_create_function is not None
@@ -162,6 +167,9 @@ class Learner(object):
             critic_lr=critic_lr,
             clip_range=ppo_clip_range,
             ent_coef=ppo_ent_coef,
+            actor=actor_net,
+            critic=critic_net,
+            optimizer=optimizer,
         )
 
         self.agent.policy = self.ppo_learner.policy
